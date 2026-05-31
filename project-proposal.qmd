@@ -1,0 +1,37 @@
+---
+title: "project-proposal"
+format: html
+editor: visual
+---
+
+## Workflow organisation:
+
+- Code Style:
+
+  - tidyverse style
+
+  - enforced with styler
+
+- Packages:
+
+  - renv for version reproducibility
+
+  - styler
+
+  - knitr
+
+- Git workflow:
+
+  - each group member has his own branch
+
+  - regular pr/merges ensure members stay up to date
+
+  - the tasks will be split among the members, but not neccessarly be placed in new branches
+
+- .gitignore:
+
+  - if applicable `.env` will be excluded
+
+  - raw data files
+
+  - rendered outputs

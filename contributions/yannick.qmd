@@ -1,0 +1,9 @@
+---
+title: "Contribution Yannick"
+format: html
+editor: visual
+---
+
+31.05.:
+
+- created inital commit with first version of .gitignore and github workflow organisation
