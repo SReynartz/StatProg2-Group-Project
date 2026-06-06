@@ -4,6 +4,66 @@ format: html
 editor: visual
 ---
 
+## Initial data analysis:
+
+### 1. `glimpse()`
+
+```{r}
+library(caraccidents)
+library(dplyr)
+glimpse(verkehrsunfaelle)
+```
+
+### 2. Summary statistics for key variables
+
+```{r}
+# Summary statistics
+summary(verkehrsunfaelle)
+```
+
+```{r}
+# Count missing values per column
+colSums(is.na(verkehrsunfaelle))
+```
+
+### 3. Exploratory Plots
+
+```{r}
+#| warning: false
+#| message: false
+library(ggplot2)
+
+# Plot 1: Distribution of monthly accident values by category
+verkehrsunfaelle %>% 
+  filter(monat != "Summe", !is.na(wert)) %>% 
+  ggplot(aes(x = wert, fill = monatszahl)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ monatszahl, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribution of Monthly Accidents by Category",
+       x = "Number of Accidents (wert)",
+       y = "Count")
+```
+
+```{r}
+# Plot 2: Yearly trend of total accidents by category
+verkehrsunfaelle %>% 
+  filter(monat == "Summe", auspraegung == "insgesamt", !is.na(wert)) %>% 
+  ggplot(aes(x = jahr, y = wert, color = monatszahl)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  labs(title = "Yearly Trend of Total Accidents by Category",
+       x = "Year",
+       y = "Total Number of Accidents (wert)")
+```
+
+### 4. Notes on data quality issues
+
+- **Missing values**: `wert` has 84 NAs (especially for the year 2026 where values seem to be not yet recorded). Other calculated columns like `veraend_vormonat_prozent` also have NAs (up to 274).
+- **Inconsistent formatting**: The `monat` column mixes YYYYMM format (e.g., "202601") with the string "Summe" to represent annual totals, violating the tidy data principle.
+- **Unexpected values**: Because monthly counts and annual totals ("Summe") are kept in the same column (`wert`), the range of `wert` is extremely skewed (0 to 46,988), which could bias naive aggregations or plots. The year is duplicated in both the `jahr` and `monat` columns.
+
 ## Workflow organisation:
 
 - Code Style:
