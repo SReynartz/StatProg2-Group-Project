@@ -9,33 +9,32 @@ editor: visual
 ### 1. `glimpse()`
 
 ```{r}
-library(caraccidents)
 library(dplyr)
-glimpse(verkehrsunfaelle)
+library(readr)
+traffic_accidents <- read_csv("data/verkehrsunfaelle.csv")
+glimpse(traffic_accidents)
 ```
 
 ### 2. Summary statistics for key variables
 
 ```{r}
 # Summary statistics
-summary(verkehrsunfaelle)
+summary(traffic_accidents)
 ```
 
 ```{r}
 # Count missing values per column
-colSums(is.na(verkehrsunfaelle))
+colSums(is.na(traffic_accidents))
 ```
 
 ### 3. Exploratory Plots
 
 ```{r}
-#| warning: false
-#| message: false
 library(ggplot2)
 
 # Plot 1: Distribution of monthly accident values by category
-verkehrsunfaelle %>% 
-  filter(monat != "Summe", !is.na(wert)) %>% 
+traffic_accidents |>  
+  filter(monat != "Summe", !is.na(wert)) |> 
   ggplot(aes(x = wert, fill = monatszahl)) +
   geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
   facet_wrap(~ monatszahl, scales = "free") +
@@ -47,8 +46,8 @@ verkehrsunfaelle %>%
 
 ```{r}
 # Plot 2: Yearly trend of total accidents by category
-verkehrsunfaelle %>% 
-  filter(monat == "Summe", auspraegung == "insgesamt", !is.na(wert)) %>% 
+traffic_accidents |>  
+  filter(monat == "Summe", auspraegung == "insgesamt", !is.na(wert)) |> 
   ggplot(aes(x = jahr, y = wert, color = monatszahl)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
@@ -86,7 +85,7 @@ verkehrsunfaelle %>%
 
   - regular pr/merges ensure members stay up to date
 
-  - the tasks will be split among the members, but not neccessarly be placed in new branches
+  - the tasks will be split among the members, but not necessarly be placed in new branches
 
 - .gitignore:
 
