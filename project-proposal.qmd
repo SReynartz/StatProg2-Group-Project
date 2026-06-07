@@ -79,6 +79,10 @@ traffic_accidents |>
 
   - knitr
 
+  - readr
+
+  - ggplot2
+
 - Git workflow:
 
   - each group member has his own branch
