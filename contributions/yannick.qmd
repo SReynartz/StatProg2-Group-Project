@@ -4,6 +4,12 @@ format: html
 editor: visual
 ---
 
-31.05.:
+**Primarily responsible for:** data cleaning (`data-raw/clean-data.R`), IDA section
 
-- created inital commit with first version of .gitignore and github workflow organisation
+- Sourced and documented dataset and dataset licence
+
+- Wrote data cleaning pipeline
+
+**Collaborative tasks:**
+
+- workflow organisation
