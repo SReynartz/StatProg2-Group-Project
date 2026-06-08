@@ -4,14 +4,14 @@ format: html
 editor: visual
 ---
 
-## Quarto
 
-## **Analysis Plan**  
 
--   Variables**:** Number of accidents (*WERT*, numerical), year (*JAHR*, numerical), month (*MONAT*, numerical), accident type (*MONATSZAHL*, categorical), and accident severity/category (*AUSPRAEGUNG*, categorical).
+## Analysis Plan 
 
--   Method**:** Time-series and seasonal analysis to examine long-term trends, monthly patterns. A simple regression model with trend and seasonal variables can be used to forecast accident counts for the following month
+-   Variables: Number of accidents (*WERT*, numerical), year (*JAHR*, numerical), month (*MONAT*, numerical), accident type (*MONATSZAHL*, categorical), and accident severity/category (*AUSPRAEGUNG*, categorical).
 
--   Data Cleaning**:** Convert month and year into a proper date variable, check for missing values, and aggregate data by year, month, or accident category where needed.
+-   Method: Time-series and seasonal analysis to examine long-term trends, monthly patterns. A simple regression model with trend and seasonal variables can be used to forecast accident counts for the following month
 
--   Risks/Uncertainties**:** Missing or incomplete records, short observation periods for some categories, seasonal fluctuations, and external influences that are not included in the dataset.
+-   Data Cleaning: Convert month and year into a proper date variable, check for missing values, and aggregate data by year, month, or accident category where needed.
+
+-   Risks/Uncertainties: Missing or incomplete records, short observation periods for some categories, seasonal fluctuations, and external influences that are not included in the dataset.
