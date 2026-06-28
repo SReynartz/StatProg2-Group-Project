@@ -24,9 +24,11 @@ This is a descriptive question because it focuses on summarizing and visualizing
 
 ### Exploratory
 
-**How do alcohol-related accidents vary over the course of the year? Are there seasonal patterns, and how does their share of all traffic accidents change across months?**
+*Question:* How do alcohol-related traffic accidents vary over the course of the year, and how does their share of total traffic accidents change across months?
 
-This is mainly an exploratory question because it looks for recurring patterns and possible seasonal structure in alcohol-related accidents. It also has a descriptive component because it examines the monthly share of alcohol-related accidents relative to total traffic accidents.
+*Planned Output 1 (Seasonal Pattern):* A multi-year seasonal line plot (using `ggplot2`) displaying the raw count of accidents on the y-axis (`WERT`) against the month of the year on the x-axis (derived from `MONAT`). The data will be filtered for alcohol-related accidents (`MONATSZAHL` == "Alkoholunfälle" and `AUSPRAEGUNG` == "insgesamt"). Each line will represent a different year (`JAHR`), allowing us to identify recurring seasonal peaks.
+
+*Planned Output 2 (Proportional Share):* A stacked bar chart or an area plot showing the monthly proportion of alcohol-related accidents relative to the total number of accidents ("Verkehrsunfälle"). This will utilize `WERT`, grouping by `MONAT` and `MONATSZAHL`.
 
 ### Predictive
 
@@ -101,13 +103,43 @@ traffic_accidents |>
 
 # **Analysis Plan**
 
-- Variables**:** Number of accidents (*WERT*, numerical), year (*JAHR*, numerical), month (*MONAT*, numerical), accident type (*MONATSZAHL*, categorical), and accident severity/category (*AUSPRAEGUNG*, categorical).
+The following steps will be tracked as individual GitHub Issues and distributed among group members:
 
-- Method**:** Time-series and seasonal analysis to examine long-term trends, monthly patterns. A simple regression model with trend and seasonal variables can be used to forecast accident counts for the following month
+- **Task 1: Data Cleaning & Formatting (Issue #1)**
 
-- Data Cleaning**:** Convert month and year into a proper date variable, check for missing values, and aggregate data by year, month, or accident category where needed.
+  - Filter out the "Summe" rows from the `MONAT` column to isolate purely monthly data.
 
-- Risks/Uncertainties**:** Missing or incomplete records, short observation periods for some categories, seasonal fluctuations, and external influences that are not included in the dataset.
+  - Parse the YYYYMM format in the `MONAT` column into a proper R `Date` object or separate `Month` factor variable for seasonal plotting.
+
+- **Task 2: Data Aggregation for Exploratory Question (Issue #2)**
+
+  - Create a summarized dataframe calculating the monthly share of "Alkoholunfälle" relative to total "Verkehrsunfälle".
+
+- **Task 3: Visualisation of Seasonal Trends (Issue #3)**
+
+  - Draft the `ggplot2` seasonal line plot for alcohol-related accidents.
+
+- **Task 4: Visualisation of Accident Proportions (Issue #4)**
+
+  - Draft the stacked bar chart showing the proportion of alcohol accidents per month.
+
+- **Task 5: Feature Engineering for Regression (Issue #5)**
+
+  - Create a continuous trend variable representing time progression using the mean of and `MONAT` columns.
+
+- **Task 6: Model Fitting (Issue #6)**
+
+  - Fit a simple regression model to predict the number of accidents (`WERT`) using the newly engineered trend and seasonal variables.
+
+  - Extract the model's fitted values and calculate predictions for the following month.
+
+- **Task 7: Visualisation of Predictive Model Results (Issue #7)**
+
+  - Draft Graph: A time-series line plot overlaying the actual accident counts (`WERT`) with the model's predicted values to visualize the fit over time.
+
+- **Task 8: Final Presentation Assembly (Issue #8)**
+
+  - Integrate the plots into the final Quarto slide deck format.
 
 # Workflow organisation:
 
