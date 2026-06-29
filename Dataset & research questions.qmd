@@ -36,12 +36,50 @@ clean <- raw %>%
 
 ## 1. Source and Licence
 
-This dataset was published by the Open Data Portal of the City of Munich. It is available as *Monatszahlen Verkehrsunfälle* and can be downloaded in CSV format; the portal also provides other formats such as XML and JSON. The data is released under the Datenlizenz Deutschland Namensnennung 2.0 (dl-by-de), which allows reuse as long as the source is credited.
+This dataset was published by the Open Data Portal of the City of Munich (Statistical Bureau of Munich). It is available as *Monatszahlen Verkehrsunfälle* and can be downloaded in CSV format; the portal also provides other formats such as XML and JSON. The data is released under the [Data Licence Germany – Attribution – Version 2.0](http://www.govdata.de/dl-de/by-2-0) (dl-by-de), which allows reuse as long as the source is credited. The file used for this analysis was accessed on 2026-06-07.
 
 
 ## 2. What Is in It
 
 The dataset contains 2450 rows and 10 columns. Each row represents one monthly record for a specific traffic accident category in Munich. The table includes the year and month of the observation, the recorded value, and additional indicators such as previous-year values and percentage changes over time. The main variables are `_id`, `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`, `VORJAHRESWERT`, `VERAEND_VORMONAT_PROZENT`, `VERAEND_VORJAHRESMONAT_PROZENT`, and `ZWOELF_MONATE_MITTELWERT`.
+
+### Initial data check
+
+```{r}
+#| label: ida-glimpse
+dplyr::glimpse(raw)
+```
+
+```{r}
+#| label: ida-missing
+#| tbl-cap: "Missing values per column in the raw dataset"
+knitr::kable(t(colSums(is.na(raw))))
+```
+
+```{r}
+#| label: fig-ida-yearly-trend
+#| fig-cap: "Yearly totals by accident category (raw, unfiltered data)"
+
+yearly <- raw %>%
+  filter(MONAT == "Summe", AUSPRAEGUNG == "insgesamt", !is.na(WERT))
+
+plot(NULL, xlim = range(yearly$JAHR), ylim = range(yearly$WERT),
+     xlab = "Year", ylab = "Total accidents per year")
+kategorien <- unique(yearly$MONATSZAHL)
+farben <- c("steelblue", "tomato", "darkgreen")
+for (i in seq_along(kategorien)) {
+  d <- yearly[yearly$MONATSZAHL == kategorien[i], ]
+  d <- d[order(d$JAHR), ]
+  lines(d$JAHR, d$WERT, type = "b", pch = 16, col = farben[i], lwd = 2)
+}
+legend("topright", legend = kategorien, col = farben, lwd = 2, pch = 16, bty = "n")
+```
+
+**Data quality notes:**
+
+- **Missing values:** `WERT` has missing values, especially for the most recent year (2026), where monthly figures have not yet been recorded.
+- **Inconsistent formatting:** the `MONAT` column mixes the `YYYYMM` format (e.g. `"202601"`) with the string `"Summe"` for annual totals, which violates the tidy-data principle of one observation per row.
+- **Mixed granularity:** because monthly counts and annual totals are stored in the same `WERT` column, naive aggregation without filtering out `"Summe"` rows would silently double-count accidents. All analyses below therefore explicitly drop `MONAT == "Summe"` rows (see `scripts/01_clean_data.R`) before computing monthly statistics.
 
 
 ## 3. Research Questions
@@ -143,15 +181,25 @@ legend("topleft", legend = c("Actual", "Predicted"), col = c("black", "tomato"),
 
 ## 4. Analysis Plan
 
-The remaining work is split into the following steps, each trackable as a separate GitHub Issue and assignable to one group member:
+Each step is trackable as a separate GitHub Issue and assignable to one group member. Steps 1–5 (the core analysis behind Section 3) are already complete; the remaining weeks focus on presentation and polishing.
 
-1. **Data cleaning** (Yannick) — load the raw CSV, filter to the relevant `MONATSZAHL`/`AUSPRAEGUNG` categories ("Alkoholunfälle" and "Verkehrsunfälle" / "insgesamt"), drop non-monthly rows (e.g. `MONAT = "Summe"`), and export a tidy long-format data frame with `JAHR`, `MONAT`, `MONATSZAHL`, `WERT`.
-2. **Exploratory analysis: seasonality of alcohol-related accidents** (Selma) — compute monthly means and the monthly % share of alcohol-related accidents relative to total accidents; produce *Figure 1* and *Table 1*.
-3. **Feature engineering for the predictive model** (Yannick) — build a linear time-trend variable and calendar-month dummies from `JAHR`/`MONAT`; split the series into a training period and a held-out test period (e.g. last 12 months).
-4. **Model fitting and evaluation** (Selma) — fit the linear regression on the training period, generate predictions for the test period, and produce *Table 2* and *Figure 2* (incl. RMSE).
-5. **Visualisation and report polishing** (Selma & Yannick) — finalize styling of Figures 1–2 and Table 1–2, write up interpretation text, and assemble the rendered report/website.
+1. ✅ **Data cleaning** (Yannick) — load the raw CSV, filter to the relevant `MONATSZAHL`/`AUSPRAEGUNG` categories ("Alkoholunfälle" and "Verkehrsunfälle" / "insgesamt"), drop non-monthly rows (e.g. `MONAT = "Summe"`), and export a tidy long-format data frame with `JAHR`, `MONAT`, `MONATSZAHL`, `WERT`.
+2. ✅ **Initial data exploration and quality checks** (Yannick) — `glimpse()`/`summary()`, missing-value counts, and documentation of data-quality issues (see Section 2).
+3. ✅ **Exploratory analysis: seasonality of alcohol-related accidents** (Selma) — compute monthly means and the monthly % share of alcohol-related accidents relative to total accidents; produce *Figure 1* and *Table 1*.
+4. ✅ **Feature engineering and model fitting for the predictive question** (Selma) — build a linear time-trend variable and calendar-month dummies from `JAHR`/`MONAT`, split into training/held-out test period (last 12 months), fit the regression and produce *Table 2*.
+5. ✅ **Predictive evaluation** (Selma) — generate test-period predictions and produce *Figure 2* (predicted vs. actual, with RMSE).
+6. ☐ **Visualisation polish** (Selma & Yannick) — restyle Figures 1–2 (e.g. consistent `ggplot2` theme per Section 6 workflow conventions), refine table formatting, write up interpretation text for each figure/table.
+7. ☐ **Final presentation assembly** (Selma & Yannick) — integrate the polished figures/tables into the final report/slide format for hand-in.
 
 
 ## 5. Context and Target Audience
 
 The project is situated in a public policy and urban planning context. The target audience includes local policymakers, city administrators, urban mobility planners, and road safety stakeholders in Munich. For this audience, suitable presentation formats include concise reports, policy briefs, slide presentations, dashboards, and clear visualizations such as time series plots, seasonal comparisons, and simple forecasts.
+
+
+## 6. Workflow Organisation
+
+- **Code style:** tidyverse style, enforced with `styler`.
+- **Packages:** `renv` for version reproducibility, `styler`, `knitr`, `readr`, `ggplot2` (exploratory/predictive chunks in this document currently use base R plotting for local-rendering robustness; restyling to `ggplot2` is tracked in Analysis Plan step 6).
+- **Git workflow:** each group member works on their own branch; regular PRs/merges keep members up to date. Tasks are split among members but not necessarily placed in new branches.
+- **`.gitignore`:** excludes `.Rproj.user`, `.Rhistory`, `.RData`, `.Ruserdata`, `.env` (if applicable), and rendered outputs.
