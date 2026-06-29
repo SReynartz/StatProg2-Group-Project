@@ -1,0 +1,176 @@
+---
+title: "project-proposal"
+format: html
+editor: visual
+---
+
+# Dataset & research questions
+
+## 1. Source and Licence
+
+This dataset was published by the Open Data Portal of the City of Munich. It is available as *Monatszahlen Verkehrsunfälle* and can be downloaded in CSV format; the portal also provides other formats such as XML and JSON. The data is released under the Datenlizenz Deutschland Namensnennung 2.0 (dl-by-de), which allows reuse as long as the source is credited.
+
+## 2. What Is in It
+
+The dataset contains 2450 rows and 10 columns. Each row represents one monthly record for a specific traffic accident category in Munich. The table includes the year and month of the observation, the recorded value, and additional indicators such as previous-year values and percentage changes over time. The main variables are `_id`, `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`, `VORJAHRESWERT`, `VERAEND_VORMONAT_PROZENT`, `VERAEND_VORJAHRESMONAT_PROZENT`, and `ZWOELF_MONATE_MITTELWERT`.
+
+## 3. Research Questions
+
+### Descriptive
+
+**How have monthly traffic accident counts in Munich developed over time?**
+
+This is a descriptive question because it focuses on summarizing and visualizing long-term developments in the monthly accident data.
+
+### Exploratory
+
+*Question:* How do alcohol-related traffic accidents vary over the course of the year, and how does their share of total traffic accidents change across months?
+
+*Planned Output 1 (Seasonal Pattern):* A multi-year seasonal line plot (using `ggplot2`) displaying the raw count of accidents on the y-axis (`WERT`) against the month of the year on the x-axis (derived from `MONAT`). The data will be filtered for alcohol-related accidents (`MONATSZAHL` == "Alkoholunfälle" and `AUSPRAEGUNG` == "insgesamt"). Each line will represent a different year (`JAHR`), allowing us to identify recurring seasonal peaks.
+
+*Planned Output 2 (Proportional Share):* A stacked bar chart or an area plot showing the monthly proportion of alcohol-related accidents relative to the total number of accidents ("Verkehrsunfälle"). This will utilize `WERT`, grouping by `MONAT` and `MONATSZAHL`.
+
+### Predictive
+
+**Can the number of traffic accidents in the following month be predicted using a simple regression model that accounts for long-term trend and seasonality?**
+
+This question aims to evaluate whether a basic predictive model can capture the temporal structure of the data well enough to generate short-term forecasts.
+
+## 4. Context and Target Audience
+
+The project is situated in a public policy and urban planning context. The target audience includes local policymakers, city administrators, urban mobility planners, and road safety stakeholders in Munich. For this audience, suitable presentation formats include concise reports, policy briefs, slide presentations, dashboards, and clear visualizations such as time series plots, seasonal comparisons, and simple forecasts.
+
+# Initial data analysis:
+
+### 1. `glimpse()`
+
+```{r}
+library(dplyr)
+library(readr)
+traffic_accidents <- read_csv("data/verkehrsunfaelle.csv")
+glimpse(traffic_accidents)
+```
+
+### 2. Summary statistics for key variables
+
+```{r}
+# Summary statistics
+summary(traffic_accidents)
+```
+
+```{r}
+# Count missing values per column
+colSums(is.na(traffic_accidents))
+```
+
+### 3. Exploratory Plots
+
+```{r}
+library(ggplot2)
+
+# Plot 1: Distribution of monthly accident values by category
+traffic_accidents |>  
+  filter(monat != "Summe", !is.na(wert)) |> 
+  ggplot(aes(x = wert, fill = monatszahl)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ monatszahl, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribution of Monthly Accidents by Category",
+       x = "Number of Accidents (wert)",
+       y = "Count")
+```
+
+```{r}
+# Plot 2: Yearly trend of total accidents by category
+traffic_accidents |>  
+  filter(monat == "Summe", auspraegung == "insgesamt", !is.na(wert)) |> 
+  ggplot(aes(x = jahr, y = wert, color = monatszahl)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  labs(title = "Yearly Trend of Total Accidents by Category",
+       x = "Year",
+       y = "Total Number of Accidents (wert)")
+```
+
+### 4. Notes on data quality issues
+
+- **Missing values**: `wert` has 84 NAs (especially for the year 2026 where values seem to be not yet recorded). Other calculated columns like `veraend_vormonat_prozent` also have NAs (up to 274).
+
+- **Inconsistent formatting**: The `monat` column mixes YYYYMM format (e.g., "202601") with the string "Summe" to represent annual totals, violating the tidy data principle.
+
+- **Unexpected values**: Because monthly counts and annual totals ("Summe") are kept in the same column (`wert`), the range of `wert` is extremely skewed (0 to 46,988), which could bias naive aggregations or plots. The year is duplicated in both the `jahr` and `monat` columns.
+
+# **Analysis Plan**
+
+The following steps will be tracked as individual GitHub Issues and distributed among group members:
+
+- **Task 1: Data Cleaning & Formatting (Issue #1)**
+
+  - Filter out the "Summe" rows from the `MONAT` column to isolate purely monthly data.
+
+  - Parse the YYYYMM format in the `MONAT` column into a proper R `Date` object or separate `Month` factor variable for seasonal plotting.
+
+- **Task 2: Data Aggregation for Exploratory Question (Issue #2)**
+
+  - Create a summarized dataframe calculating the monthly share of "Alkoholunfälle" relative to total "Verkehrsunfälle".
+
+- **Task 3: Visualisation of Seasonal Trends (Issue #3)**
+
+  - Draft the `ggplot2` seasonal line plot for alcohol-related accidents.
+
+- **Task 4: Visualisation of Accident Proportions (Issue #4)**
+
+  - Draft the stacked bar chart showing the proportion of alcohol accidents per month.
+
+- **Task 5: Feature Engineering for Regression (Issue #5)**
+
+  - Create a continuous trend variable representing time progression using the mean of and `MONAT` columns.
+
+- **Task 6: Model Fitting (Issue #6)**
+
+  - Fit a simple regression model to predict the number of accidents (`WERT`) using the newly engineered trend and seasonal variables.
+
+  - Extract the model's fitted values and calculate predictions for the following month.
+
+- **Task 7: Visualisation of Predictive Model Results (Issue #7)**
+
+  - Draft Graph: A time-series line plot overlaying the actual accident counts (`WERT`) with the model's predicted values to visualize the fit over time.
+
+- **Task 8: Final Presentation Assembly (Issue #8)**
+
+  - Integrate the plots into the final Quarto slide deck format.
+
+# Workflow organisation:
+
+- Code Style:
+
+  - tidyverse style
+
+  - enforced with styler
+
+- Packages:
+
+  - renv for version reproducibility
+
+  - styler
+
+  - knitr
+
+  - readr
+
+  - ggplot2
+
+- Git workflow:
+
+  - each group member has his own branch
+
+  - regular pr/merges ensure members stay up to date
+
+  - the tasks will be split among the members, but not necessarly be placed in new branches
+
+- .gitignore:
+
+  - if applicable `.env` will be excluded
+
+  - rendered outputs
