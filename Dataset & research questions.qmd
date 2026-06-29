@@ -1,3 +1,39 @@
+---
+title: "Traffic Accidents in Munich — Dataset and Research Questions"
+format:
+  html:
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(dplyr)
+
+raw <- read.csv("data/raw/verkehrsunfaelle.csv", encoding = "UTF-8", stringsAsFactors = FALSE)
+
+clean <- raw %>%
+  filter(MONAT != "Summe") %>%
+  mutate(
+    jahr  = JAHR,
+    monat = as.integer(substr(MONAT, 5, 6)),
+    wert  = WERT
+  ) %>%
+  filter(!is.na(wert)) %>%
+  select(monatszahl = MONATSZAHL, auspraegung = AUSPRAEGUNG, jahr, monat, wert)
+```
+
+## 0. Group and Repository
+
+**Group members:** Selma, Yannick
+
+**GitHub repository:** [StatProg2-Group-Project](https://github.com/SReynartz/StatProg2-Group-Project)
+
+
 ## 1. Source and Licence
 
 This dataset was published by the Open Data Portal of the City of Munich. It is available as *Monatszahlen Verkehrsunfälle* and can be downloaded in CSV format; the portal also provides other formats such as XML and JSON. The data is released under the Datenlizenz Deutschland Namensnennung 2.0 (dl-by-de), which allows reuse as long as the source is credited.
@@ -10,22 +46,112 @@ The dataset contains 2450 rows and 10 columns. Each row represents one monthly r
 
 ## 3. Research Questions
 
-### Descriptive
-**How have monthly traffic accident counts in Munich developed over time?**
-
-This is a descriptive question because it focuses on summarizing and visualizing long-term developments in the monthly accident data.
-
 ### Exploratory
 **How do alcohol-related accidents vary over the course of the year? Are there seasonal patterns, and how does their share of all traffic accidents change across months?**
 
 This is mainly an exploratory question because it looks for recurring patterns and possible seasonal structure in alcohol-related accidents. It also has a descriptive component because it examines the monthly share of alcohol-related accidents relative to total traffic accidents.
+
+**Output (variables used:** `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`**):**
+
+```{r}
+#| label: fig-alcohol-seasonality
+#| fig-cap: "Figure 1: Seasonal pattern of alcohol-related accidents in Munich (mean monthly count, averaged across all years)"
+
+alkohol <- clean %>%
+  filter(monatszahl == "Alkoholunfälle", auspraegung == "insgesamt") %>%
+  select(jahr, monat, alkohol_wert = wert)
+
+gesamt <- clean %>%
+  filter(monatszahl == "Verkehrsunfälle", auspraegung == "insgesamt") %>%
+  select(jahr, monat, gesamt_wert = wert)
+
+merged <- inner_join(alkohol, gesamt, by = c("jahr", "monat")) %>%
+  mutate(share_pct = 100 * alkohol_wert / gesamt_wert)
+
+fig1_data <- merged %>%
+  group_by(monat) %>%
+  summarise(mean_alkohol = mean(alkohol_wert), .groups = "drop")
+
+plot(
+  fig1_data$monat, fig1_data$mean_alkohol,
+  type = "b", pch = 16, col = "steelblue", lwd = 2,
+  xaxt = "n", xlab = "Month", ylab = "Mean number of alcohol-related accidents"
+)
+axis(1, at = 1:12)
+```
+
+```{r}
+#| label: tbl-alcohol-share
+#| tbl-cap: "Table 1: Monthly average share (%) of alcohol-related accidents relative to all traffic accidents"
+
+table1 <- merged %>%
+  group_by(monat) %>%
+  summarise(
+    mean_alkohol_unfaelle = round(mean(alkohol_wert), 1),
+    mean_gesamt_unfaelle  = round(mean(gesamt_wert), 1),
+    mean_share_pct        = round(mean(share_pct), 2),
+    .groups = "drop"
+  )
+
+knitr::kable(table1)
+```
 
 ### Predictive
 **Can the number of traffic accidents in the following month be predicted using a simple regression model that accounts for long-term trend and seasonality?**
 
 This question aims to evaluate whether a basic predictive model can capture the temporal structure of the data well enough to generate short-term forecasts.
 
+**Output (variables used:** `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`**):**
 
-## 4. Context and Target Audience
+```{r}
+#| label: tbl-regression
+#| tbl-cap: "Table 2: Linear regression of total monthly accident counts on a linear time trend and calendar-month dummies"
+
+gesamt_ts <- clean %>%
+  filter(monatszahl == "Verkehrsunfälle", auspraegung == "insgesamt") %>%
+  arrange(jahr, monat) %>%
+  mutate(t = row_number(), monat_f = factor(monat, levels = 1:12))
+
+n_test <- 12
+n <- nrow(gesamt_ts)
+train <- gesamt_ts[1:(n - n_test), ]
+test  <- gesamt_ts[(n - n_test + 1):n, ]
+
+model <- lm(wert ~ t + monat_f, data = train)
+
+knitr::kable(broom::tidy(model), digits = 3)
+```
+
+```{r}
+#| label: fig-predicted-vs-actual
+#| fig-cap: "Figure 2: Predicted vs. actual monthly accident counts on the held-out test period (last 12 months)"
+
+pred <- predict(model, newdata = test)
+rmse <- sqrt(mean((test$wert - pred)^2))
+
+plot(
+  test$t, test$wert,
+  type = "b", pch = 16, col = "black", lwd = 2,
+  xlab = "Time index (test period, last 12 months)", ylab = "Monthly accident count",
+  sub = sprintf("Test-set RMSE = %.1f", rmse),
+  ylim = range(c(test$wert, pred))
+)
+lines(test$t, pred, type = "b", pch = 17, col = "tomato", lwd = 2)
+legend("topleft", legend = c("Actual", "Predicted"), col = c("black", "tomato"), pch = c(16, 17), lwd = 2, bty = "n")
+```
+
+
+## 4. Analysis Plan
+
+The remaining work is split into the following steps, each trackable as a separate GitHub Issue and assignable to one group member:
+
+1. **Data cleaning** (Yannick) — load the raw CSV, filter to the relevant `MONATSZAHL`/`AUSPRAEGUNG` categories ("Alkoholunfälle" and "Verkehrsunfälle" / "insgesamt"), drop non-monthly rows (e.g. `MONAT = "Summe"`), and export a tidy long-format data frame with `JAHR`, `MONAT`, `MONATSZAHL`, `WERT`.
+2. **Exploratory analysis: seasonality of alcohol-related accidents** (Selma) — compute monthly means and the monthly % share of alcohol-related accidents relative to total accidents; produce *Figure 1* and *Table 1*.
+3. **Feature engineering for the predictive model** (Yannick) — build a linear time-trend variable and calendar-month dummies from `JAHR`/`MONAT`; split the series into a training period and a held-out test period (e.g. last 12 months).
+4. **Model fitting and evaluation** (Selma) — fit the linear regression on the training period, generate predictions for the test period, and produce *Table 2* and *Figure 2* (incl. RMSE).
+5. **Visualisation and report polishing** (Selma & Yannick) — finalize styling of Figures 1–2 and Table 1–2, write up interpretation text, and assemble the rendered report/website.
+
+
+## 5. Context and Target Audience
 
 The project is situated in a public policy and urban planning context. The target audience includes local policymakers, city administrators, urban mobility planners, and road safety stakeholders in Munich. For this audience, suitable presentation formats include concise reports, policy briefs, slide presentations, dashboards, and clear visualizations such as time series plots, seasonal comparisons, and simple forecasts.
