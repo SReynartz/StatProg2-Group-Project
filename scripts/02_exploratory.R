@@ -1,6 +1,6 @@
 library(dplyr)
 
-clean <- read.csv("../data/clean_data.csv", encoding = "UTF-8")
+clean <- read.csv("data/clean_data.csv", encoding = "UTF-8")
 
 alkohol <- clean %>%
   filter(monatszahl == "Alkoholunfälle", auspraegung == "insgesamt") %>%
@@ -18,7 +18,7 @@ fig1_data <- merged %>%
   group_by(monat) %>%
   summarise(mean_alkohol = mean(alkohol_wert), .groups = "drop")
 
-png("../outputs/figures/figure1_alcohol_seasonality.png", width = 1050, height = 675, res = 150)
+png("outputs/figures/figure1_alcohol_seasonality.png", width = 1050, height = 675, res = 150)
 plot(
   fig1_data$monat, fig1_data$mean_alkohol,
   type = "b", pch = 16, col = "steelblue", lwd = 2,
@@ -39,7 +39,7 @@ table1 <- merged %>%
     .groups = "drop"
   )
 
-write.csv(table1, "../outputs/tables/table1_alcohol_share.csv", row.names = FALSE)
+write.csv(table1, "outputs/tables/table1_alcohol_share.csv", row.names = FALSE)
 
 cat("Figure 1 saved to outputs/figures/figure1_alcohol_seasonality.png\n")
 cat("Table 1:\n")

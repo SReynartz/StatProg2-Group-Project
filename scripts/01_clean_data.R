@@ -1,6 +1,6 @@
 library(dplyr)
 
-raw <- read.csv("../data/raw/verkehrsunfaelle.csv", encoding = "UTF-8", stringsAsFactors = FALSE)
+raw <- read.csv("data/raw/verkehrsunfaelle.csv", encoding = "UTF-8", stringsAsFactors = FALSE)
 
 clean <- raw %>%
   filter(MONAT != "Summe") %>%
@@ -12,7 +12,7 @@ clean <- raw %>%
   filter(!is.na(wert)) %>%
   select(monatszahl = MONATSZAHL, auspraegung = AUSPRAEGUNG, jahr, monat, wert)
 
-write.csv(clean, "../data/clean_data.csv", row.names = FALSE)
+write.csv(clean, "data/clean_data.csv", row.names = FALSE)
 
 cat("Cleaned rows:", nrow(clean), "\n")
 cat("Categories kept:", paste(unique(clean$monatszahl), collapse = " | "), "\n")

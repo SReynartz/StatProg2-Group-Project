@@ -1,6 +1,6 @@
 library(dplyr)
 
-clean <- read.csv("../data/clean_data.csv", encoding = "UTF-8")
+clean <- read.csv("data/clean_data.csv", encoding = "UTF-8")
 
 gesamt <- clean %>%
   filter(monatszahl == "Verkehrsunfälle", auspraegung == "insgesamt") %>%
@@ -15,12 +15,12 @@ test  <- gesamt[(n - n_test + 1):n, ]
 model <- lm(wert ~ t + monat, data = train)
 
 table2 <- broom::tidy(model)
-write.csv(table2, "../outputs/tables/table2_regression_coefficients.csv", row.names = FALSE)
+write.csv(table2, "outputs/tables/table2_regression_coefficients.csv", row.names = FALSE)
 
 pred <- predict(model, newdata = test)
 rmse <- sqrt(mean((test$wert - pred)^2))
 
-png("../outputs/figures/figure2_predicted_vs_actual.png", width = 1050, height = 675, res = 150)
+png("outputs/figures/figure2_predicted_vs_actual.png", width = 1050, height = 675, res = 150)
 plot(
   test$t, test$wert,
   type = "b", pch = 16, col = "black", lwd = 2,
