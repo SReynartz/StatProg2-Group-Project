@@ -39,7 +39,7 @@ This dataset was published by the Open Data Portal of the City of Munich (Statis
 
 ## 2. What Is in It
 
-The dataset contains 2450 rows and 10 columns. Each row represents one monthly record for a specific traffic accident category in Munich. The table includes the year and month of the observation, the recorded value, and additional indicators such as previous-year values and percentage changes over time. The main variables are `_id`, `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`, `VORJAHRESWERT`, `VERAEND_VORMONAT_PROZENT`, `VERAEND_VORJAHRESMONAT_PROZENT`, and `ZWOELF_MONATE_MITTELWERT`.
+The dataset contains 2450 rows and 10 columns. Each row represents one monthly record for a specific traffic accident category in Munich, uniquely identified by the combination of `MONATSZAHL` (accident category, e.g. *Alkoholunfälle*), `AUSPRAEGUNG` (sub-category, e.g. *insgesamt*), `JAHR` (year), and `MONAT` (year-month code); the `_id` column is a surrogate key for this combination. The main variables used in our analysis are `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, and `WERT` (the monthly count). The remaining columns are pre-computed comparison indicators provided by the data publisher: `VORJAHRESWERT` is the equivalent count for the same month one year earlier; `VERAEND_VORMONAT_PROZENT` and `VERAEND_VORJAHRESMONAT_PROZENT` are percentage changes relative to the previous month and the same month in the prior year, respectively; and `ZWOELF_MONATE_MITTELWERT` is a 12-month rolling average. These derived columns are not used in our analysis.
 
 ### Initial data check
 
@@ -116,6 +116,8 @@ plot(
 axis(1, at = 1:12)
 ```
 
+Figure 1 shows a clear seasonal pattern: alcohol-related accidents are at their lowest in winter (January–February, around 31–32 per month on average) and rise steadily through spring and summer, peaking in July (~55) and again in September (~57). This suggests that warmer months with more outdoor activity and nightlife are associated with higher alcohol-related accident rates, while the dip in August relative to the surrounding months may reflect holiday absences reducing commuter traffic.
+
 ```{r}
 #| label: tbl-alcohol-share
 #| tbl-cap: "Table 1: Monthly average share (%) of alcohol-related accidents relative to all traffic accidents"
@@ -132,11 +134,13 @@ table1 <- merged %>%
 knitr::kable(table1)
 ```
 
+Table 1 confirms that the seasonal pattern in Figure 1 is not simply driven by higher overall accident volumes in summer: the *share* of alcohol-related accidents also peaks in late summer and early autumn (August 1.51 %, September 1.54 %), while winter months (February–March, around 1.0 %) have a proportionally lower alcohol share. This means alcohol-related accidents are overrepresented in summer relative to total accidents, not merely more frequent in absolute terms.
+
 ### Predictive
 
 **Can the number of traffic accidents in the following month be predicted using a simple regression model that accounts for long-term trend and seasonality?**
 
-This question aims to evaluate whether a basic predictive model can capture the temporal structure of the data well enough to generate short-term forecasts.
+This model is used for **short-term forecasting**, not causal explanation: the goal is to evaluate whether a parsimonious model can anticipate next-month accident volumes well enough to be useful for planning purposes. The coefficients for the month dummies quantify average seasonal effects relative to January, and the linear trend term captures a gradual long-run change in accident counts, but neither should be interpreted as causal mechanisms.
 
 **Output (variables used:** `MONATSZAHL`, `AUSPRAEGUNG`, `JAHR`, `MONAT`, `WERT`**):**
 
@@ -159,6 +163,8 @@ model <- lm(wert ~ t + monat_f, data = train)
 knitr::kable(broom::tidy(model), digits = 3)
 ```
 
+Table 2 shows the fitted regression coefficients. The intercept (~2932) represents the model's baseline for January of the first year in the training period. The trend coefficient (~0.53 per month, approximately 6 additional accidents per year) indicates a modest long-run upward drift. The month dummies reveal strong seasonality: July carries the largest positive effect (+1043 accidents relative to January), followed by October (+940) and September (+728), consistent with the exploratory findings. February and August dummies are small and statistically weak, suggesting those months are close to the January baseline once trend is accounted for.
+
 ```{r}
 #| label: fig-predicted-vs-actual
 #| fig-cap: "Figure 2: Predicted vs. actual monthly accident counts on the held-out test period (last 12 months)"
@@ -176,6 +182,8 @@ plot(
 lines(test$t, pred, type = "b", pch = 17, col = "tomato", lwd = 2)
 legend("topleft", legend = c("Actual", "Predicted"), col = c("black", "tomato"), pch = c(16, 17), lwd = 2, bty = "n")
 ```
+
+Figure 2 shows that the model tracks the seasonal shape of the test period reasonably well, capturing the winter trough and summer peaks. The test-set RMSE of approximately 233 represents a relative error of around 6–7 % against typical monthly totals of 3000–4500 accidents, which is acceptable for a simple two-parameter model (trend + month dummies). The model tends to underestimate the highest peaks (notably the July spike), suggesting that a more flexible approach — such as adding interaction terms or using a non-linear trend — could improve accuracy at the extremes.
 
 ## 4. Analysis Plan
 
@@ -195,6 +203,7 @@ The project is situated in a public policy and urban planning context. The targe
 
 ## 6. Workflow Organisation
 
+- **Canonical cleaning script:** `scripts/01_clean_data.R` (reads `data/raw/verkehrsunfaelle.csv`, writes `data/clean_data.csv`). Run from the project root. `data-raw/clean-data.R` is a legacy alternative and is not required to reproduce the analysis.
 - **Code style:** tidyverse style, enforced with `styler`.
 - **Packages:** `renv` for version reproducibility, `styler`, `knitr`, `readr`, `ggplot2` (exploratory/predictive chunks in this document currently use base R plotting for local-rendering robustness; restyling to `ggplot2` is tracked in Analysis Plan step 6).
 - **Git workflow:** each group member works on their own branch; regular PRs/merges keep members up to date. Tasks are split among members but not necessarily placed in new branches.
