@@ -1,15 +1,15 @@
 ---
 title: "Contribution Yannick"
-format: html
-editor: visual
+format: pdf
 ---
 
-**Primarily responsible for:** data cleaning (`data-raw/clean-data.R`), IDA section
+## Yannick — Contribution Statement
 
-- Sourced and documented dataset and dataset licence
+**Primarily responsible for:** data cleaning (initial pipeline version), initial data analysis (IDA), project reproducibility (`renv.lock`), and README/Quarto output configuration.
 
-- Wrote data cleaning pipeline
+- **Repository Configuration**: Configured the Quarto output options in the proposal YAML header to automatically compile directly to `index.html` to support deployment on GitHub Pages.
+- **Sourcing & Cleaning**: Sourced the Munich traffic accidents dataset, documented the dataset licensing (`data/raw/LICENCE.md`), and wrote the initial version of the data cleaning script that established the data-filtering logic (dropping 'Summe' rows and selecting variables).
+- **Initial Data Analysis & Plan**: Wrote the initial IDA section in the proposal (Section 2, including the dataset shape, missing-value diagnostic counts, and data-quality warnings) and authored the structured Analysis Plan.
+- **Environment & Reproducibility**: Implemented project package management using `renv` to pin package versions, refactored the analytical scripts to execute cleanly from the project root, and documented execution steps in `README.md`.
 
-**Collaborative tasks:**
-
-- workflow organisation
+**Collaborative tasks:** workflow organisation, merging and consolidation of the proposal document (`project-proposal.qmd`), final report compilation, and formatting.

@@ -1,0 +1,14 @@
+---
+title: "Contribution Selma"
+format: pdf
+---
+
+## Selma — Contribution Statement
+
+**Primarily responsible for:** exploratory analysis (`scripts/02_exploratory.R`), predictive modelling (`scripts/03_predictive.R`), proposal document (`project-proposal.qmd`)
+
+- Designed and executed the exploratory analysis of alcohol-related accident seasonality, producing Figure 1 (seasonal line plot) and Table 1 (monthly share table)
+- Built and evaluated the regression forecasting model using a linear trend and calendar-month dummies, producing Table 2 (coefficient table) and Figure 2 (predicted vs. actual plot with RMSE)
+- Revised and consolidated the proposal document to meet the updated assignment requirements, including reducing the research questions to two and embedding the full analysis pipeline directly in the Quarto document
+
+**Collaborative tasks:** workflow organisation, interpretation prose, data cleaning, final report assembly
