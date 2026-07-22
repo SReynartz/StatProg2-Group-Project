@@ -1,0 +1,123 @@
+---
+title: "Group Reflection"
+---
+
+## Skills inventory
+
+For each skill area, describe what your group actually used it for. If you did not use a skill, say so and note why.
+
+### Functions & refactoring (W2)
+
+*What we did:* Organised the data cleaning, exploratory analysis, and predictive modeling code into structured, sequential R scripts (`scripts/01_clean_data.R`, `scripts/02_exploratory.R`, and `scripts/03_predictive.R`). We kept the code linear and did not write custom functions, as the scripts were only single use.
+
+*What worked well:* Linear scripts were very easy to trace, write, and review since they did not involve complex abstractions.
+
+*What was hard:* Keeping the code DRY (Don't Repeat Yourself). Because we did not write custom functions, the cleaning logic ended up duplicated between `scripts/01_clean_data.R` and the setup chunk of `project-proposal.qmd`.
+
+### Debugging (W3)
+
+*What we did:* Diagnosed and fixed data parsing errors (such as columns read with wrong types due to `NA` values) and path reference issues when executing scripts from different folders.
+
+*What worked well:* R's error messages and `traceback()` were useful for isolating where parsing or file reading errors occurred.
+
+*What was hard:* Tracking down relative path errors that only occurred when rendering the Quarto document (which runs in its own context) versus running the R scripts directly.
+
+### Version control & remotes (W4)
+
+*What we did:* Use GitHub as our host. We started with different branches, but in the end moved to one single main branch.
+
+*What worked well:* Using GitHub to sync our work
+
+*What was hard:* Using different branches as that seem to simply create more overhead.
+
+### Quarto websites & collaborative coding (W5)
+
+*What we did:* Configured the Quarto project and published it to GitHub Pages. We added YAML configurations like `output-file: "index.html"` to automate the build for GitHub Pages.
+
+*What worked well:* Having the document automatically render directly to `index.html` in the project root made publishing simple and repeatable.
+
+*What was hard:* We did not face any significant difficulties in this area.
+
+### R packages (W6)
+
+*What we did:* Imported and utilized core packages such as `dplyr` for data manipulation, `broom` for tidy regression outputs, `knitr` for tables, and `readr` for data loading.
+
+*What worked well:* `dplyr` verbs (like `filter`, `select`, `mutate`) and `broom::tidy()` made the code highly readable and simplified data transformations.
+
+*What was hard:* Keeping track of packages and ensuring they were installed across our different development environments before setting up `renv`.
+
+### Initial data analysis & data cleaning (W7)
+
+*What we did:* Performed initial data diagnostics (checking missingness and granularity). Filtered out row-aggregated annual totals (`MONAT == "Summe"`) and split the `MONAT` character column into distinct `jahr` and `monat` columns for plotting.
+
+*What worked well:* Identifying and removing the annual totals was crucial for getting correct monthly averages and avoiding double-counting in figures and tables.
+
+*What was hard:* Realizing that `WERT` contained missing values for the current year (2026) and deciding to exclude those rows from the analytical modeling.
+
+### Reproducibility, open data & renv (W9)
+
+*What we did:* Used renv to sync our packages. Locked down all package dependencies in `renv.lock` and restored them using `renv::restore()`.
+
+*What worked well:* `renv` ensured that all required package versions were identical across different environments, preventing "missing package" errors.
+
+*What was hard:* We did not face any major issues using `renv` once the lockfile was set up.
+
+### Analysis & inference strategies (W10)
+
+*What we did:* Built a linear regression model that predicts monthly accident counts using a linear trend index `t` and calendar-month dummy variables. We used a 12-month held-out test set to evaluate forecasting performance with RMSE.
+
+*What worked well:* The train/test split gave us a reliable, objective estimate of how well our simple model can forecast future monthly accident volumes.
+
+*What was hard:* Formulating the model to represent both the long-term trend and seasonal monthly deviations without overcomplicating the model specification.
+
+### Communication & visualization (W11)
+
+*What we did:* Generated two base R plots (average alcohol accident seasonality and predicted vs. actual monthly counts) with detailed captions, and wrote explanatory prose under each table and figure.
+
+*What worked well:* The added interpretation prose made the report self-explanatory and helped convey the core conclusions of our analysis clearly.
+
+*What was hard:* Tuning base R plotting options (like labels, axis limits, and legend placements) to look professional.
+
+## Key analytical decisions
+
+Describe 2–3 decisions that had a meaningful effect on your results or workflow.
+
+### Decision 1: Filtering Out Annual Totals
+
+*What were we deciding between?* Aggregating the raw dataset directly versus filtering out rows where `MONAT == "Summe"` before any summaries or plots.
+
+*How did we reason through it?* The raw dataset contains both monthly rows (e.g. `202501`) and annual sum rows (e.g. `2025` / `"Summe"`) in the same table. If we had skipped filtering, any average or sum operation would have double-counted the actual number of accidents.
+
+*In hindsight, would we decide differently?* No. Dropping these rows is standard tidy-data practice and essential for any valid monthly analysis.
+
+### Decision 2: Forecasting Model Specification
+
+*What were we deciding between?* Using a simple linear regression model with a linear trend and month dummies versus fitting a complex non-linear model.
+
+*How did we reason through it?* We opted for the linear model (`lm(wert ~ t + monat)`) because it is highly interpretable, captures the key monthly seasonal patterns relative to January, and provides an easily explainable baseline for short-term forecasting.
+
+*In hindsight, would we decide differently?* No, it was appropriate for a proposal/forecasting baseline, although incorporating interaction terms or a non-linear trend could improve peak predictions in the future.
+
+## Workflow & collaboration
+
+*How did we divide work across group members?* Yannick took the lead on the initial data cleaning pipeline and the initial data analysis (IDA) section. Selma focused on exploratory analysis, generating tables and plots, and setting up the regression model. Both of us collaborated on writing the final interpretation prose and polishing the document.
+
+*What branching or Git workflow did we actually use — and did it match the proposal?* We initially planned to use feature branches (`yannick`, `selma`, `IDA`, and `Proposal`) and merges. While we did this at the beginning, we found that it added a lot of overhead. We simplified our workflow by switching to pushing directly to the main branch and using GitHub to sync our work, while continuing to split tasks between us.
+
+*What would we change about how we coordinated?* We would talk and meet more often to coordinate tasks and resolve path/structure conventions earlier in the project.
+
+## LLM usage
+
+Describe up to 5 significant uses of an LLM tool during the project.
+
+### Usage 1: Base R Plot Formatting
+
+- **Tool / model:** ChatGPT (GPT-4o)
+- **What it produced:** Base R plotting commands to customise labels, legend box borders (`bty = "n"`), and line styling for the regression evaluation plot.
+- **What we had to correct or verify:** We had to manually correct the dataset names and column references because the model output used generic variable names that did not match our clean data frame.
+
+### Usage 2: Interpretation Prose Drafts
+
+- **Tool / model:** ChatGPT (GPT-4o)
+- **What it produced:** First drafts of interpretation sentences describing what the figures and regression output tables showed.
+- **What we had to correct or verify:** We had to verify that the numbers and percentages mentioned in the drafts (e.g. the exact coefficients and average accident counts) matched the actual values in our generated outputs, correcting several hallucinations.
