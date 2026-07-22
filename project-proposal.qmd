@@ -117,7 +117,7 @@ plot(
 axis(1, at = 1:12)
 ```
 
-Figure 1 shows a clear seasonal pattern: alcohol-related accidents are at their lowest in winter (January–February, around 31–32 per month on average) and rise steadily through spring and summer, peaking in July (~55) and again in September (~57). This suggests that warmer months with more outdoor activity and nightlife are associated with higher alcohol-related accident rates, while the dip in August relative to the surrounding months may reflect holiday absences reducing commuter traffic.
+Figure 1 shows a clear seasonal pattern: alcohol-related accidents are at their lowest in winter (January–February, around 31–32 per month on average) and rise steadily through spring and summer, peaking in July (\~55) and again in September (\~57). This suggests that warmer months with more outdoor activity and nightlife are associated with higher alcohol-related accident rates, while the dip in August relative to the surrounding months may reflect holiday absences reducing commuter traffic.
 
 ```{r}
 #| label: tbl-alcohol-share
@@ -164,7 +164,7 @@ model <- lm(wert ~ t + monat_f, data = train)
 knitr::kable(broom::tidy(model), digits = 3)
 ```
 
-Table 2 shows the fitted regression coefficients. The intercept (~2932) represents the model's baseline for January of the first year in the training period. The trend coefficient (~0.53 per month, approximately 6 additional accidents per year) indicates a modest long-run upward drift. The month dummies reveal strong seasonality: July carries the largest positive effect (+1043 accidents relative to January), followed by October (+940) and September (+728), consistent with the exploratory findings. February and August dummies are small and statistically weak, suggesting those months are close to the January baseline once trend is accounted for.
+Table 2 shows the fitted regression coefficients. The intercept (\~2932) represents the model's baseline for January of the first year in the training period. The trend coefficient (\~0.53 per month, approximately 6 additional accidents per year) indicates a modest long-run upward drift. The month dummies reveal strong seasonality: July carries the largest positive effect (+1043 accidents relative to January), followed by October (+940) and September (+728), consistent with the exploratory findings. February and August dummies are small and statistically weak, suggesting those months are close to the January baseline once trend is accounted for.
 
 ```{r}
 #| label: fig-predicted-vs-actual
@@ -195,7 +195,7 @@ Each step is trackable as a separate GitHub Issue and assignable to one group me
 3.  ✅ **Exploratory analysis: seasonality of alcohol-related accidents** (Selma) — compute monthly means and the monthly % share of alcohol-related accidents relative to total accidents; produce *Figure 1* and *Table 1*.
 4.  ✅ **Feature engineering and model fitting for the predictive question** (Selma) — build a linear time-trend variable and calendar-month dummies from `JAHR`/`MONAT`, split into training/held-out test period (last 12 months), fit the regression and produce *Table 2*.
 5.  ✅ **Predictive evaluation** (Selma) — generate test-period predictions and produce *Figure 2* (predicted vs. actual, with RMSE).
-6.  [ ] **Visualisation polish** (Selma & Yannick) — restyle Figures 1–2 (e.g. consistent `ggplot2` theme per Section 6 workflow conventions), refine table formatting, write up interpretation text for each figure/table.
+6.  ✅ **Visualisation polish** (Selma & Yannick) — ~~restyle Figures 1–2 (e.g. consistent `ggplot2` theme per Section 6 workflow conventions), refine table formatting,~~ write up interpretation text for each figure/table.
 7.  [ ] **Final presentation assembly** (Selma & Yannick) — integrate the polished figures/tables into the final report/slide format for hand-in.
 
 ## 5. Context and Target Audience
