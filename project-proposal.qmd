@@ -3,6 +3,7 @@ title: "Traffic Accidents in Munich — Dataset and Research Questions"
 format:
   html:
     embed-resources: true
+    output-file: "index.html"
 execute:
   echo: false
   warning: false
@@ -203,7 +204,7 @@ The project is situated in a public policy and urban planning context. The targe
 
 ## 6. Workflow Organisation
 
-- **Canonical cleaning script:** `scripts/01_clean_data.R` (reads `data/raw/verkehrsunfaelle.csv`, writes `data/clean_data.csv`). Run from the project root. `data-raw/clean-data.R` is a legacy alternative and is not required to reproduce the analysis.
+- **Canonical cleaning script:** `scripts/01_clean_data.R` (reads `data/raw/verkehrsunfaelle.csv`, writes `data/clean_data.csv`). Run from the project root.
 - **Code style:** tidyverse style, enforced with `styler`.
 - **Packages:** `renv` for version reproducibility, `styler`, `knitr`, `readr`, `ggplot2` (exploratory/predictive chunks in this document currently use base R plotting for local-rendering robustness; restyling to `ggplot2` is tracked in Analysis Plan step 6).
 - **Git workflow:** each group member works on their own branch; regular PRs/merges keep members up to date. Tasks are split among members but not necessarily placed in new branches.
