@@ -196,7 +196,7 @@ Each step is trackable as a separate GitHub Issue and assignable to one group me
 4.  ✅ **Feature engineering and model fitting for the predictive question** (Selma) — build a linear time-trend variable and calendar-month dummies from `JAHR`/`MONAT`, split into training/held-out test period (last 12 months), fit the regression and produce *Table 2*.
 5.  ✅ **Predictive evaluation** (Selma) — generate test-period predictions and produce *Figure 2* (predicted vs. actual, with RMSE).
 6.  ✅ **Visualisation polish** (Selma & Yannick) — ~~restyle Figures 1–2 (e.g. consistent `ggplot2` theme per Section 6 workflow conventions), refine table formatting,~~ write up interpretation text for each figure/table.
-7.  [ ] **Final presentation assembly** (Selma & Yannick) — integrate the polished figures/tables into the final report/slide format for hand-in.
+7.  ✅ **Final presentation assembly** (Selma & Yannick) — integrate the polished figures/tables into the final report/slide format for hand-in.
 
 ## 5. Context and Target Audience
 
